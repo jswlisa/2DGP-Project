@@ -1,7 +1,8 @@
 from pico2d import *
 
-image = load_image('girl.png')
 open_canvas()
+
+image = load_image('girl.png')
 
 frame = 0
 x = 0
@@ -17,7 +18,6 @@ while True:
     elif x < 0:
         direction = 1
 
-    # 렌더링
     clear_canvas()
     image.clip_draw(frame * 256, 0, 256, 145, x, y)
     update_canvas()
