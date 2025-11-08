@@ -1,5 +1,5 @@
 from pico2d import load_image, get_time
-from pico2d import SDL_KEYDOWN, SDL_KEYUP, SDLK_RIGHT, SDLK_LEFT
+from pico2d import SDL_KEYDOWN, SDL_KEYUP, SDLK_RIGHT, SDLK_LEFT, SDLK_LCTRL
 from state_machine import StateMachine
 
 import game_world
@@ -16,6 +16,12 @@ def left_down(e):
 
 def left_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_LEFT
+
+def ctrl_down(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_LCTRL
+
+def ctrl_up(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_LCTRL
 
 # Girl의 Walk Speed 계산
 
@@ -74,7 +80,24 @@ class Idle:
         else:
             self.girl.image.clip_composite_draw(0, 0, 256, 145, 0, 'h', self.girl.x, self.girl.y, 256, 145)
 
+class Attack:
+    def __init__(self, girl):
+        self.girl = girl
 
+    def enter(self,e):
+        self.girl.dir = 0
+
+    def exit(self,e):
+        self.girl.dir = 0
+
+    def do(self):
+        self.girl.frame = (self.girl.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 5
+
+    def draw(self):
+        if self.girl.face_dir == 1: # right
+            self.girl.attack_image.clip_draw(int(self.girl.frame) * 269, 0, 269, 185, self.girl.x, self.girl.y, 269, 185)
+        else: # face_dir == -1: # left
+            self.girl.attack_image.clip_composite_draw(int(self.girl.frame) * 269, 0, 269, 185, 0, 'h', self.girl.x, self.girl.y, 269, 185)
 
 class Girl:
     def __init__(self):
@@ -83,14 +106,19 @@ class Girl:
         self.face_dir = 1
         self.dir = 0
         self.image = load_image('girl.png')
+        self.attack_image = load_image('girl_attack.png')
 
         self.IDLE = Idle(self)
         self.WALK = Walk(self)
+        self.ATTACK = Attack(self)
         self.state_machine = StateMachine(
             self.IDLE,
             {
-                self.IDLE: {right_down: self.WALK, left_down: self.WALK, right_up: self.WALK, left_up: self.WALK},
-                self.WALK: {right_down: self.IDLE, left_down: self.IDLE, right_up: self.IDLE, left_up: self.IDLE}
+                self.IDLE: {right_down: self.WALK, left_down: self.WALK, right_up: self.WALK, left_up: self.WALK,
+                            ctrl_down: self.ATTACK, ctrl_up: self.ATTACK},
+                self.WALK: {right_down: self.IDLE, left_down: self.IDLE, right_up: self.IDLE, left_up: self.IDLE,
+                            ctrl_down: self.ATTACK, ctrl_up: self.ATTACK}
+                ,self.ATTACK: {ctrl_up: self.IDLE, ctrl_down: self.ATTACK}
             }
         )
 
