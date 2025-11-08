@@ -67,19 +67,18 @@ class Idle:
 
     def do(self):
         self.girl.frame = (self.girl.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 5
-        self.girl.x += self.girl.dir * WALK_SPEED_PPS * game_framework.frame_time
 
     def draw(self):
         if self.girl.face_dir == 1:
-            self.girl.image.clip_draw(int(self.girl.frame) * 256, 0, 256, 145, self.girl.x, self.girl.y, 256, 145)
+            self.girl.image.clip_draw(0, 0, 256, 145, self.girl.x, self.girl.y, 256, 145)
         else:
-            self.girl.image.clip_composite_draw(int(self.girl.frame) * 256, 0, 256, 145, 0, 'h', self.girl.x, self.girl.y, 256, 145)
+            self.girl.image.clip_composite_draw(0, 0, 256, 145, 0, 'h', self.girl.x, self.girl.y, 256, 145)
 
 
 
 class Girl:
     def __init__(self):
-        self.x, self.y = 400, 300
+        self.x, self.y = 400, 130
         self.frame = 0
         self.face_dir = 1
         self.dir = 0
