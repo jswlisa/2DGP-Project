@@ -67,7 +67,7 @@ class Idle:
 
 class Girl:
     def __init__(self):
-        self.x, self.y = 400, 300  # 시작 위치를 화면 중앙으로 변경
+        self.x, self.y = 400, 300
         self.frame = 0
         self.face_dir = 1
         self.dir = 0
