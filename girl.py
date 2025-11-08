@@ -33,7 +33,7 @@ WALK_SPEED_MPS = (WALK_SPEED_MPM / 60.0)
 WALK_SPEED_PPS = (WALK_SPEED_MPS * PIXEL_PER_METER)
 
 # Girl Action Speed
-TIME_PER_ACTION = 0.5
+TIME_PER_ACTION = 0.9
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAMES_PER_ACTION = 8
 
@@ -56,9 +56,9 @@ class Walk:
 
     def draw(self):
         if self.girl.face_dir == 1: # right
-            self.girl.image.clip_draw(int(self.girl.frame) * 256, 0, 256, 145, self.girl.x, self.girl.y)
+            self.girl.image.clip_draw(int(self.girl.frame) * 297, 0, 297, 168, self.girl.x, self.girl.y, 297 * 2, 168 * 2)
         else: # face_dir == -1: # left
-            self.girl.image.clip_composite_draw(int(self.girl.frame) * 256, 0, 256, 145, 0, 'h', self.girl.x, self.girl.y, 256, 145)
+            self.girl.image.clip_composite_draw(int(self.girl.frame) * 297, 0, 297, 168, 0, 'h', self.girl.x, self.girl.y, 297 * 2, 168 * 2)
 
 
 class Idle:
@@ -76,9 +76,9 @@ class Idle:
 
     def draw(self):
         if self.girl.face_dir == 1:
-            self.girl.image.clip_draw(0, 0, 256, 145, self.girl.x, self.girl.y, 256, 145)
+            self.girl.image.clip_draw(0, 0, 297, 168, self.girl.x, self.girl.y, 297 * 2, 168 * 2)
         else:
-            self.girl.image.clip_composite_draw(0, 0, 256, 145, 0, 'h', self.girl.x, self.girl.y, 256, 145)
+            self.girl.image.clip_composite_draw(0, 0, 297, 168, 0, 'h', self.girl.x, self.girl.y, 297 * 2, 168 * 2)
 
 class Attack:
     def __init__(self, girl):
@@ -95,18 +95,24 @@ class Attack:
 
     def draw(self):
         if self.girl.face_dir == 1: # right
-            self.girl.attack_image.clip_draw(int(self.girl.frame) * 269, 0, 269, 185, self.girl.x, self.girl.y, 269, 185)
+            self.girl.girl_attack_image.clip_draw(int(self.girl.frame) * 269, 0, 269, 185, self.girl.x, self.girl.y, 269 * 2, 185 * 2)
         else: # face_dir == -1: # left
-            self.girl.attack_image.clip_composite_draw(int(self.girl.frame) * 269, 0, 269, 185, 0, 'h', self.girl.x, self.girl.y, 269, 185)
+            self.girl.girl_attack_image.clip_composite_draw(int(self.girl.frame) * 269, 0, 269, 185, 0, 'h', self.girl.x, self.girl.y, 269 * 2, 185 * 2)
+
+        if self.girl.face_dir == 1:
+            self.girl.attack_effect_image.clip_draw(int(self.girl.frame+1) * 558, 0, 558, 466, self.girl.x + 80, self.girl.y, 558//2, 466//2)
+        else:
+            self.girl.attack_effect_image.clip_composite_draw(int(self.girl.frame+1) * 558, 0, 558, 466, 0, 'h', self.girl.x - 80, self.girl.y, 558 // 2, 466 // 2)
 
 class Girl:
     def __init__(self):
-        self.x, self.y = 400, 130
+        self.x, self.y = 400, 180
         self.frame = 0
         self.face_dir = 1
         self.dir = 0
         self.image = load_image('girl.png')
-        self.attack_image = load_image('girl_attack.png')
+        self.girl_attack_image = load_image('girl_attack.png')
+        self.attack_effect_image = load_image('attack_effect.png')
 
         self.IDLE = Idle(self)
         self.WALK = Walk(self)
