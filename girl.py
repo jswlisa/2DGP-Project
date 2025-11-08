@@ -1,5 +1,5 @@
 from pico2d import load_image, get_time
-from pico2d import SDL_KEYDOWN, SDL_KEYUP, SDLK_RIGHT, SDLK_LEFT, SDLK_LCTRL
+from pico2d import SDL_KEYDOWN, SDL_KEYUP, SDLK_RIGHT, SDLK_LEFT, SDLK_LCTRL, SDLK_LSHIFT
 from state_machine import StateMachine
 
 import game_world
@@ -22,6 +22,12 @@ def ctrl_down(e):
 
 def ctrl_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_LCTRL
+
+def shift_down(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_LSHIFT
+
+def shift_up(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_LSHIFT
 
 # Girl의 Walk Speed 계산
 
@@ -56,9 +62,9 @@ class Walk:
 
     def draw(self):
         if self.girl.face_dir == 1: # right
-            self.girl.image.clip_draw(int(self.girl.frame) * 297, 0, 297, 168, self.girl.x, self.girl.y, 297 * 2, 168 * 2)
+            self.girl.image.clip_draw(int(self.girl.frame) * 297, 0, 297, 168, self.girl.x, self.girl.y, 297 * 1.5, 168 * 1.5)
         else: # face_dir == -1: # left
-            self.girl.image.clip_composite_draw(int(self.girl.frame) * 297, 0, 297, 168, 0, 'h', self.girl.x, self.girl.y, 297 * 2, 168 * 2)
+            self.girl.image.clip_composite_draw(int(self.girl.frame) * 297, 0, 297, 168, 0, 'h', self.girl.x, self.girl.y, 297 * 1.5, 168 * 1.5)
 
 
 class Idle:
@@ -76,9 +82,9 @@ class Idle:
 
     def draw(self):
         if self.girl.face_dir == 1:
-            self.girl.image.clip_draw(0, 0, 297, 168, self.girl.x, self.girl.y, 297 * 2, 168 * 2)
+            self.girl.image.clip_draw(0, 0, 297, 168, self.girl.x, self.girl.y, 297 * 1.5, 168 * 1.5)
         else:
-            self.girl.image.clip_composite_draw(0, 0, 297, 168, 0, 'h', self.girl.x, self.girl.y, 297 * 2, 168 * 2)
+            self.girl.image.clip_composite_draw(0, 0, 297, 168, 0, 'h', self.girl.x, self.girl.y, 297 * 1.5, 168 * 1.5)
 
 class Attack:
     def __init__(self, girl):
@@ -95,14 +101,33 @@ class Attack:
 
     def draw(self):
         if self.girl.face_dir == 1: # right
-            self.girl.girl_attack_image.clip_draw(int(self.girl.frame) * 269, 0, 269, 185, self.girl.x, self.girl.y, 269 * 2, 185 * 2)
+            self.girl.girl_attack_image.clip_draw(int(self.girl.frame) * 269, 0, 269, 185, self.girl.x, self.girl.y, 269 * 1.5, 185 * 1.5)
         else: # face_dir == -1: # left
-            self.girl.girl_attack_image.clip_composite_draw(int(self.girl.frame) * 269, 0, 269, 185, 0, 'h', self.girl.x, self.girl.y, 269 * 2, 185 * 2)
+            self.girl.girl_attack_image.clip_composite_draw(int(self.girl.frame) * 269, 0, 269, 185, 0, 'h', self.girl.x, self.girl.y, 269 * 1.5, 185 * 1.5)
 
         if self.girl.face_dir == 1:
-            self.girl.attack_effect_image.clip_draw(int(self.girl.frame+1) * 558, 0, 558, 466, self.girl.x + 80, self.girl.y, 558//2, 466//2)
+            self.girl.attack_effect_image.clip_draw(int(self.girl.frame+1) * 558, 0, 558, 466, self.girl.x + 80, self.girl.y, 558//3, 466//3)
         else:
-            self.girl.attack_effect_image.clip_composite_draw(int(self.girl.frame+1) * 558, 0, 558, 466, 0, 'h', self.girl.x - 80, self.girl.y, 558 // 2, 466 // 2)
+            self.girl.attack_effect_image.clip_composite_draw(int(self.girl.frame+1) * 558, 0, 558, 466, 0, 'h', self.girl.x - 80, self.girl.y, 558 // 3, 466 // 3)
+
+class Skill:
+    def __init__(self, girl):
+        self.girl = girl
+
+    def enter(self,e):
+        self.girl.dir = 0
+
+    def exit(self,e):
+        self.girl.dir = 0
+
+    def do(self):
+        self.girl.frame = (self.girl.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 5
+
+    def draw(self):
+        if self.girl.face_dir == 1: # right
+            self.girl.girl_skill_image.clip_draw(int(self.girl.frame) * 297, 0, 297, 168, self.girl.x + 40, self.girl.y + 30, 297 * 3, 168 * 3)
+        else: # face_dir == -1: # left
+            self.girl.girl_skill_image.clip_composite_draw(int(self.girl.frame) * 297, 0, 297, 168, 0, 'h', self.girl.x - 40, self.girl.y + 30, 297 * 3, 168 * 3)
 
 class Girl:
     def __init__(self):
@@ -113,18 +138,21 @@ class Girl:
         self.image = load_image('girl.png')
         self.girl_attack_image = load_image('girl_attack.png')
         self.attack_effect_image = load_image('attack_effect.png')
+        self.girl_skill_image = load_image('girl_skill.png')
 
         self.IDLE = Idle(self)
         self.WALK = Walk(self)
         self.ATTACK = Attack(self)
+        self.SKILL = Skill(self)
         self.state_machine = StateMachine(
             self.IDLE,
             {
                 self.IDLE: {right_down: self.WALK, left_down: self.WALK, right_up: self.WALK, left_up: self.WALK,
-                            ctrl_down: self.ATTACK, ctrl_up: self.ATTACK},
+                            ctrl_down: self.ATTACK, ctrl_up: self.ATTACK, shift_down: self.SKILL, shift_up: self.SKILL},
                 self.WALK: {right_down: self.IDLE, left_down: self.IDLE, right_up: self.IDLE, left_up: self.IDLE,
-                            ctrl_down: self.ATTACK, ctrl_up: self.ATTACK}
-                ,self.ATTACK: {ctrl_up: self.IDLE, ctrl_down: self.ATTACK}
+                            ctrl_down: self.ATTACK, ctrl_up: self.ATTACK},
+                self.ATTACK: {ctrl_up: self.IDLE, ctrl_down: self.ATTACK},
+                self.SKILL: {shift_up: self.IDLE, shift_down: self.SKILL}
             }
         )
 
