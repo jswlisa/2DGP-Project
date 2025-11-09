@@ -168,12 +168,14 @@ class Girl:
         self.state_machine = StateMachine(
             self.IDLE,
             {
-                self.IDLE: {right_down: self.WALK, left_down: self.WALK, right_up: self.WALK, left_up: self.WALK,
+                self.IDLE: {right_down: self.WALK, left_down: self.WALK, right_up: self.IDLE, left_up: self.IDLE,
                             ctrl_down: self.ATTACK, shift_down: self.SKILL},
                 self.WALK: {right_down: self.IDLE, left_down: self.IDLE, right_up: self.IDLE, left_up: self.IDLE,
                             ctrl_down: self.ATTACK, ctrl_up: self.ATTACK},
-                self.ATTACK: {timeout: self.IDLE}, # TIMEOUT 이벤트가 발생하면 IDLE 상태로 전환
-                self.SKILL: {timeout: self.IDLE}  # TIMEOUT 이벤트가 발생하면 IDLE 상태로 전환
+                self.ATTACK: {right_down: self.WALK, left_down: self.WALK, right_up: self.IDLE, left_up: self.IDLE,
+                              timeout: self.IDLE}, # TIMEOUT 이벤트가 발생하면 IDLE 상태로 전환
+                self.SKILL: {right_down: self.WALK, left_down: self.WALK, right_up: self.IDLE, left_up: self.IDLE,
+                             timeout: self.IDLE}  # TIMEOUT 이벤트가 발생하면 IDLE 상태로 전환
             }
         )
 
