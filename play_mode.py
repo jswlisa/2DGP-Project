@@ -6,6 +6,7 @@ import game_world
 
 from girl import Girl
 from waterfront import WaterFront
+from enemy import Enemy
 
 girl = None
 
@@ -27,6 +28,9 @@ def init():
 
     girl = Girl()
     game_world.add_object(girl, 1)
+
+    enemy = Enemy()
+    game_world.add_object(enemy, 1)
 
 def update():
     game_world.update()
