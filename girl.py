@@ -1,4 +1,4 @@
-from pico2d import load_image, get_time
+from pico2d import load_image
 from pico2d import SDL_KEYDOWN, SDL_KEYUP, SDLK_RIGHT, SDLK_LEFT, SDLK_LCTRL, SDLK_LSHIFT
 from state_machine import StateMachine
 
@@ -85,9 +85,9 @@ class Idle:
 
     def draw(self):
         if self.girl.face_dir == 1:
-            self.girl.image.clip_draw(0, 0, 297, 168, self.girl.x, self.girl.y, 297 * 1.5, 168 * 1.5)
+            self.girl.idle_image.clip_draw(int(self.girl.frame) * 297, 0, 297, 168, self.girl.x + 15, self.girl.y + 10, 297 * 1.6, 168 * 1.6)
         else:
-            self.girl.image.clip_composite_draw(0, 0, 297, 168, 0, 'h', self.girl.x, self.girl.y, 297 * 1.5, 168 * 1.5)
+            self.girl.idle_image.clip_composite_draw(int(self.girl.frame) * 297, 0, 297, 168, 0, 'h', self.girl.x - 15, self.girl.y + 10, 297 * 1.6, 168 * 1.6)
 
 class Attack:
     def __init__(self, girl):
@@ -157,6 +157,7 @@ class Girl:
         self.face_dir = 1
         self.dir = 0
         self.image = load_image('girl.png')
+        self.idle_image = load_image('girl_idle.png')
         self.girl_attack_image = load_image('girl_attack.png')
         self.attack_effect_image = load_image('attack_effect.png')
         self.girl_skill_image = load_image('girl_skill.png')
