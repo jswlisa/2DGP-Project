@@ -29,6 +29,9 @@ def shift_down(e):
 def shift_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_LSHIFT
 
+def timeout(e):
+    return e[0] == 'TIMEOUT'
+
 # Girl의 Walk Speed 계산
 
 # Girl Walk Speed
@@ -91,37 +94,55 @@ class Attack:
         self.girl = girl
 
     def enter(self,e):
+        self.girl.frame = 0
         self.girl.dir = 0
 
     def exit(self,e):
         self.girl.dir = 0
 
     def do(self):
-        self.girl.frame = (self.girl.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 5
+        self.girl.frame += FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time
+
+        # Attack 애니메이션 한 번만 실행 (5프레임 정도로 제한)
+        if self.girl.frame >= 5:
+            self.girl.frame = 0
+            # Attack이 끝나면 Idle로 자동 전환
+            self.girl.state_machine.handle_state_event(('TIMEOUT', 0))  # TIMEOUT 이벤트를 발생시켜 상태 전환
 
     def draw(self):
+        # 캐릭터 공격 모션 먼저 그리기
         if self.girl.face_dir == 1: # right
             self.girl.girl_attack_image.clip_draw(int(self.girl.frame) * 269, 0, 269, 185, self.girl.x, self.girl.y, 269 * 1.5, 185 * 1.5)
         else: # face_dir == -1: # left
             self.girl.girl_attack_image.clip_composite_draw(int(self.girl.frame) * 269, 0, 269, 185, 0, 'h', self.girl.x, self.girl.y, 269 * 1.5, 185 * 1.5)
 
+        # 이펙트는 약간 지연된 프레임으로 그리기
+        effect_frame = max(0, int(self.girl.frame - 1.5))  # 지연된 프레임
         if self.girl.face_dir == 1:
-            self.girl.attack_effect_image.clip_draw(int(self.girl.frame+1) * 558, 0, 558, 466, self.girl.x + 80, self.girl.y, 558//3, 466//3)
+            self.girl.attack_effect_image.clip_draw(effect_frame * 558, 0, 558, 466, self.girl.x + 80, self.girl.y, 558//3, 466//3)
         else:
-            self.girl.attack_effect_image.clip_composite_draw(int(self.girl.frame+1) * 558, 0, 558, 466, 0, 'h', self.girl.x - 80, self.girl.y, 558 // 3, 466 // 3)
+            self.girl.attack_effect_image.clip_composite_draw(effect_frame * 558, 0, 558, 466, 0, 'h', self.girl.x - 80, self.girl.y, 558 // 3, 466 // 3)
 
 class Skill:
     def __init__(self, girl):
         self.girl = girl
 
     def enter(self,e):
+        self.girl.frame = 0
         self.girl.dir = 0
 
     def exit(self,e):
         self.girl.dir = 0
 
     def do(self):
-        self.girl.frame = (self.girl.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 5
+        self.girl.frame += FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time
+
+        # Skill 애니메이션 한 번만 실행 (5프레임 정도로 제한)
+        if self.girl.frame >= 5:
+            self.girl.frame = 0
+            # Skill이 끝나면 Idle로 자동 전환
+            self.girl.state_machine.handle_state_event(('TIMEOUT', 0))  # TIMEOUT 이벤트를 발생시켜 상태 전환
+            return
 
     def draw(self):
         if self.girl.face_dir == 1: # right
@@ -148,11 +169,11 @@ class Girl:
             self.IDLE,
             {
                 self.IDLE: {right_down: self.WALK, left_down: self.WALK, right_up: self.WALK, left_up: self.WALK,
-                            ctrl_down: self.ATTACK, ctrl_up: self.ATTACK, shift_down: self.SKILL, shift_up: self.SKILL},
+                            ctrl_down: self.ATTACK, shift_down: self.SKILL},
                 self.WALK: {right_down: self.IDLE, left_down: self.IDLE, right_up: self.IDLE, left_up: self.IDLE,
                             ctrl_down: self.ATTACK, ctrl_up: self.ATTACK},
-                self.ATTACK: {ctrl_up: self.IDLE, ctrl_down: self.ATTACK},
-                self.SKILL: {shift_up: self.IDLE, shift_down: self.SKILL}
+                self.ATTACK: {timeout: self.IDLE}, # TIMEOUT 이벤트가 발생하면 IDLE 상태로 전환
+                self.SKILL: {timeout: self.IDLE}  # TIMEOUT 이벤트가 발생하면 IDLE 상태로 전환
             }
         )
 
