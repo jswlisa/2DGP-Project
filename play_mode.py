@@ -27,7 +27,7 @@ def init():
     game_world.add_object(waterfront, 0)
 
     girl = Girl()
-    game_world.add_object(girl, 1)
+    game_world.add_object(girl, 2)
 
     enemy = Enemy()
     game_world.add_object(enemy, 1)
