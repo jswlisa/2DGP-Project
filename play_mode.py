@@ -26,11 +26,11 @@ def init():
     waterfront = WaterFront()
     game_world.add_object(waterfront, 0)
 
-    girl = Girl()
-    game_world.add_object(girl, 2)
-
     enemy = Enemy()
     game_world.add_object(enemy, 1)
+
+    girl = Girl()
+    game_world.add_object(girl, 1)
 
 def update():
     game_world.update()
