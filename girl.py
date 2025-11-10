@@ -60,7 +60,8 @@ class Walk:
             self.girl.dir = self.girl.face_dir = -1
 
     def exit(self,e):
-        self.girl.dir = 0
+        # self.girl.dir = 0
+        pass
 
     def do(self):
         self.girl.frame = (self.girl.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 5
@@ -167,32 +168,49 @@ class Jump:
     def __init__(self, girl):
         self.girl = girl
         self.jump_speed = 700.0  # 초기 점프 속도 (pixels/sec)
-        self.gravity = -2000.0   # 중력 가속도 (pixels/sec^2)
+        self.gravity = -2000.0  # 중력 가속도 (pixels/sec^2)
+        self.horizontal_speed = WALK_SPEED_PPS
 
     def enter(self, e):
         # 땅에 있을 때만 점프 가능
         if self.girl.y <= self.girl.ground_y + 1:
             self.girl.vy = self.jump_speed
-        self.girl.dir = 0
+
+        # 방향키 입력시
+        if self.girl.dir > 0:
+            self.girl.dir = 1
+            self.girl.face_dir = 1
+        elif self.girl.dir < 0:
+            self.girl.dir = -1
+            self.girl.face_dir = -1
+        else:
+            # 방향키 누른 상태가 아니면 제자리 점프
+            self.girl.dir = 0
+
         self.girl.frame = 0
 
     def exit(self, e):
         self.girl.vy = 0
+        self.girl.dir = 0
 
     def do(self):
         ft = game_framework.frame_time
+
         # 물리 계산
         self.girl.vy += self.gravity * ft
         self.girl.y += self.girl.vy * ft
 
-        # 프레임 애니메이션
+        # 수평 이동 (self.girl.dir이 0이면 이동 안 함)
+        self.girl.x += self.girl.dir * self.horizontal_speed * ft
+
+        # 애니메이션
         self.girl.frame = (self.girl.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * ft) % 5
 
         # 착지 체크
         if self.girl.y <= self.girl.ground_y:
             self.girl.y = self.girl.ground_y
             self.girl.vy = 0
-            # 점프 종료 -> TIMEOUT으로 IDLE 상태로 전환
+            self.girl.dir = 0
             self.girl.state_machine.handle_state_event(('TIMEOUT', 0))
 
     def draw(self):
