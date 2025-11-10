@@ -1,5 +1,5 @@
 from pico2d import load_image
-from pico2d import SDL_KEYDOWN, SDL_KEYUP, SDLK_RIGHT, SDLK_LEFT, SDLK_LCTRL, SDLK_LSHIFT
+from pico2d import SDL_KEYDOWN, SDL_KEYUP, SDLK_RIGHT, SDLK_LEFT, SDLK_LCTRL, SDLK_LSHIFT, SDLK_LALT
 from state_machine import StateMachine
 
 import game_world
@@ -28,6 +28,9 @@ def shift_down(e):
 
 def shift_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_LSHIFT
+
+def alt_down(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_LALT
 
 def timeout(e):
     return e[0] == 'TIMEOUT'
@@ -65,9 +68,11 @@ class Walk:
 
     def draw(self):
         if self.girl.face_dir == 1: # right
-            self.girl.image.clip_draw(int(self.girl.frame) * 297, 0, 297, 168, self.girl.x, self.girl.y, 297 * 1.5, 168 * 1.5)
+            self.girl.image.clip_draw(int(self.girl.frame) * 297, 0, 297, 168, self.girl.x, self.girl.y,
+                297 * 1.5, 168 * 1.5)
         else: # face_dir == -1: # left
-            self.girl.image.clip_composite_draw(int(self.girl.frame) * 297, 0, 297, 168, 0, 'h', self.girl.x, self.girl.y, 297 * 1.5, 168 * 1.5)
+            self.girl.image.clip_composite_draw(int(self.girl.frame) * 297, 0, 297, 168, 0, 'h',
+                self.girl.x, self.girl.y, 297 * 1.5, 168 * 1.5)
 
 
 class Idle:
@@ -85,9 +90,11 @@ class Idle:
 
     def draw(self):
         if self.girl.face_dir == 1:
-            self.girl.idle_image.clip_draw(int(self.girl.frame) * 297, 0, 297, 168, self.girl.x + 15, self.girl.y + 10, 297 * 1.6, 168 * 1.6)
+            self.girl.idle_image.clip_draw(int(self.girl.frame) * 297, 0, 297, 168, self.girl.x + 15, self.girl.y + 10,
+                297 * 1.6, 168 * 1.6)
         else:
-            self.girl.idle_image.clip_composite_draw(int(self.girl.frame) * 297, 0, 297, 168, 0, 'h', self.girl.x - 15, self.girl.y + 10, 297 * 1.6, 168 * 1.6)
+            self.girl.idle_image.clip_composite_draw(int(self.girl.frame) * 297, 0, 297, 168, 0, 'h', self.girl.x - 15,
+                self.girl.y + 10, 297 * 1.6, 168 * 1.6)
 
 class Attack:
     def __init__(self, girl):
@@ -112,16 +119,20 @@ class Attack:
     def draw(self):
         # 캐릭터 공격 모션 먼저 그리기
         if self.girl.face_dir == 1: # right
-            self.girl.girl_attack_image.clip_draw(int(self.girl.frame) * 269, 0, 269, 185, self.girl.x, self.girl.y, 269 * 1.5, 185 * 1.5)
+            self.girl.girl_attack_image.clip_draw(int(self.girl.frame) * 269, 0, 269, 185, self.girl.x, self.girl.y,
+                269 * 1.5, 185 * 1.5)
         else: # face_dir == -1: # left
-            self.girl.girl_attack_image.clip_composite_draw(int(self.girl.frame) * 269, 0, 269, 185, 0, 'h', self.girl.x, self.girl.y, 269 * 1.5, 185 * 1.5)
+            self.girl.girl_attack_image.clip_composite_draw(int(self.girl.frame) * 269, 0, 269, 185, 0, 'h',
+                self.girl.x, self.girl.y, 269 * 1.5, 185 * 1.5)
 
         # 이펙트는 약간 지연된 프레임으로 그리기
         effect_frame = max(0, int(self.girl.frame - 1.5))  # 지연된 프레임
         if self.girl.face_dir == 1:
-            self.girl.attack_effect_image.clip_draw(effect_frame * 558, 0, 558, 466, self.girl.x + 80, self.girl.y, 558//3, 466//3)
+            self.girl.attack_effect_image.clip_draw(effect_frame * 558, 0, 558, 466,
+                self.girl.x + 80, self.girl.y, 558//3, 466//3)
         else:
-            self.girl.attack_effect_image.clip_composite_draw(effect_frame * 558, 0, 558, 466, 0, 'h', self.girl.x - 80, self.girl.y, 558 // 3, 466 // 3)
+            self.girl.attack_effect_image.clip_composite_draw(effect_frame * 558, 0, 558, 466, 0, 'h',
+                self.girl.x - 80, self.girl.y, 558 // 3, 466 // 3)
 
 class Skill:
     def __init__(self, girl):
@@ -146,9 +157,52 @@ class Skill:
 
     def draw(self):
         if self.girl.face_dir == 1: # right
-            self.girl.girl_skill_image.clip_draw(int(self.girl.frame) * 297, 0, 297, 168, self.girl.x + 40, self.girl.y + 30, 297 * 3, 168 * 3)
+            self.girl.girl_skill_image.clip_draw(int(self.girl.frame) * 297, 0, 297, 168,
+                self.girl.x + 40, self.girl.y + 30, 297 * 3, 168 * 3)
         else: # face_dir == -1: # left
-            self.girl.girl_skill_image.clip_composite_draw(int(self.girl.frame) * 297, 0, 297, 168, 0, 'h', self.girl.x - 40, self.girl.y + 30, 297 * 3, 168 * 3)
+            self.girl.girl_skill_image.clip_composite_draw(int(self.girl.frame) * 297, 0, 297, 168, 0, 'h',
+                self.girl.x - 40, self.girl.y + 30, 297 * 3, 168 * 3)
+
+class Jump:
+    def __init__(self, girl):
+        self.girl = girl
+        self.jump_speed = 700.0  # 초기 점프 속도 (pixels/sec)
+        self.gravity = -2000.0   # 중력 가속도 (pixels/sec^2)
+
+    def enter(self, e):
+        # 땅에 있을 때만 점프 가능
+        if self.girl.y <= self.girl.ground_y + 1:
+            self.girl.vy = self.jump_speed
+        self.girl.dir = 0
+        self.girl.frame = 0
+
+    def exit(self, e):
+        self.girl.vy = 0
+
+    def do(self):
+        ft = game_framework.frame_time
+        # 물리 계산
+        self.girl.vy += self.gravity * ft
+        self.girl.y += self.girl.vy * ft
+
+        # 프레임 애니메이션
+        self.girl.frame = (self.girl.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * ft) % 5
+
+        # 착지 체크
+        if self.girl.y <= self.girl.ground_y:
+            self.girl.y = self.girl.ground_y
+            self.girl.vy = 0
+            # 점프 종료 -> TIMEOUT으로 IDLE 상태로 전환
+            self.girl.state_machine.handle_state_event(('TIMEOUT', 0))
+
+    def draw(self):
+        if self.girl.face_dir == 1:
+            self.girl.idle_image.clip_draw(int(self.girl.frame) * 297, 0, 297, 168,
+                self.girl.x + 15, self.girl.y + 10, 297 * 1.6, 168 * 1.6)
+        else:
+            self.girl.idle_image.clip_composite_draw(int(self.girl.frame) * 297, 0, 297, 168, 0, 'h',
+                self.girl.x - 15, self.girl.y + 10, 297 * 1.6, 168 * 1.6)
+
 
 class Girl:
     def __init__(self):
@@ -156,6 +210,11 @@ class Girl:
         self.frame = 0
         self.face_dir = 1
         self.dir = 0
+
+        # 수직 물리 속성 추가
+        self.vy = 0
+        self.ground_y = 180
+
         self.image = load_image('girl.png')
         self.idle_image = load_image('girl_idle.png')
         self.girl_attack_image = load_image('girl_attack.png')
@@ -166,17 +225,20 @@ class Girl:
         self.WALK = Walk(self)
         self.ATTACK = Attack(self)
         self.SKILL = Skill(self)
+        self.JUMP = Jump(self)
+
         self.state_machine = StateMachine(
             self.IDLE,
             {
                 self.IDLE: {right_down: self.WALK, left_down: self.WALK, right_up: self.IDLE, left_up: self.IDLE,
-                            ctrl_down: self.ATTACK, shift_down: self.SKILL},
+                            ctrl_down: self.ATTACK, shift_down: self.SKILL, alt_down: self.JUMP},
                 self.WALK: {right_down: self.IDLE, left_down: self.IDLE, right_up: self.IDLE, left_up: self.IDLE,
-                            ctrl_down: self.ATTACK, ctrl_up: self.ATTACK},
+                           ctrl_down: self.ATTACK, ctrl_up: self.ATTACK, alt_down: self.JUMP},
                 self.ATTACK: {right_down: self.WALK, left_down: self.WALK, right_up: self.IDLE, left_up: self.IDLE,
-                              timeout: self.IDLE}, # TIMEOUT 이벤트가 발생하면 IDLE 상태로 전환
+                             timeout: self.IDLE},
                 self.SKILL: {right_down: self.WALK, left_down: self.WALK, right_up: self.IDLE, left_up: self.IDLE,
-                             timeout: self.IDLE}  # TIMEOUT 이벤트가 발생하면 IDLE 상태로 전환
+                            timeout: self.IDLE}, # TIMEOUT 이벤트가 발생하면 IDLE 상태로 전환
+                self.JUMP: {timeout: self.IDLE} # TIMEOUT 이벤트가 발생하면 IDLE 상태로 전환
             }
         )
 
