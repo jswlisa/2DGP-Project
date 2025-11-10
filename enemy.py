@@ -32,7 +32,8 @@ class Idle:
         if self.enemy.face_dir == 1:
             self.enemy.image.clip_draw(int(self.enemy.frame) * 256, 0, 256, 145, self.enemy.x, self.enemy.y, 256 * 2, 145 * 2)
         else:
-            self.enemy.image.clip_composite_draw(int(self.enemy.frame) * 256, 0, 256, 145, 0, 'h', self.enemy.x, self.enemy.y, 256 * 2, 145 * 2)
+            self.enemy.image.clip_composite_draw(int(self.enemy.frame) * 256, 0, 256, 145, 0, 'h',
+                self.enemy.x, self.enemy.y, 256 * 2, 145 * 2)
 
 class Enemy:
     def __init__(self):
