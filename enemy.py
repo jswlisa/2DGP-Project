@@ -39,6 +39,7 @@ class Enemy:
     def __init__(self):
         self.x, self.y = 600, 220
         self.image = load_image('enemy.png')
+        self.enemy_hp_image = load_image('hp_sprite.png')
         self.frame = 0
         self.dir = 0
         self.face_dir = -1
@@ -57,6 +58,7 @@ class Enemy:
     def draw(self):
         self.state_machine.draw()
         draw_rectangle(*self.get_bb())
+        self.enemy_hp_image.clip_draw(0, 458, 426, 76, 1000, 550, 426 // 2, 76 // 2)
 
     def get_bb(self):
         return self.x + 20, self.y - 110, self.x + 130, self.y + 50

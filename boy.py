@@ -227,6 +227,7 @@ class Boy:
         self.idle_image = load_image('boy_idle.png')
         self.boy_attack_image = load_image('boy_attack.png')
         self.boy_skill_image = load_image('boy_skill.png')
+        self.boy_hp_image = load_image('hp_sprite.png')
 
         self.IDLE = Idle(self)
         self.WALK = Walk(self)
@@ -258,6 +259,7 @@ class Boy:
     def draw(self):
         self.state_machine.draw()
         draw_rectangle(*self.get_bb())
+        self.boy_hp_image.clip_draw(0, 458, 426, 76, 200, 550, 426 // 2, 76 // 2)
 
     def get_bb(self):
         if self.state_machine.cur_state == self.ATTACK:
