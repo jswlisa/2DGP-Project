@@ -60,3 +60,6 @@ class Enemy:
 
     def get_bb(self):
         return self.x + 20, self.y - 110, self.x + 130, self.y + 50
+
+    def handle_collision(self, group, other):
+        pass
