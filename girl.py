@@ -271,4 +271,17 @@ class Girl:
         draw_rectangle(*self.get_bb())
 
     def get_bb(self):
-        return self.x - 40, self.y - 100, self.x + 40, self.y + 80
+        if self.state_machine.cur_state == self.ATTACK:
+            # 공격 모션일 때의 충돌 박스
+            if self.face_dir == 1:
+                return self.x - 40, self.y - 100, self.x + 130, self.y + 80
+            else:
+                return self.x - 130, self.y - 100, self.x + 40, self.y + 80
+        elif self.state_machine.cur_state == self.SKILL:
+            # 스킬 모션일 때의 충돌 박스
+            if self.face_dir == 1:
+                return self.x - 180, self.y - 100, self.x + 180, self.y + 80
+            else:
+                return self.x - 180, self.y - 100, self.x + 180, self.y + 80
+        else:
+            return self.x - 40, self.y - 100, self.x + 40, self.y + 80
