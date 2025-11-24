@@ -276,4 +276,5 @@ class Boy:
             return self.x - 40, self.y - 100, self.x + 40, self.y + 80
 
     def handle_collision(self, group, other):
-        pass
+        if group == 'boy:enemy':
+            game_world.remove_object(other)
