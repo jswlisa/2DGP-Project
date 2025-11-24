@@ -35,18 +35,40 @@ class Idle:
             self.enemy.image.clip_composite_draw(int(self.enemy.frame) * 256, 0, 256, 145, 0, 'h',
                 self.enemy.x, self.enemy.y, 256 * 2, 145 * 2)
 
+class Hit:
+    def __init__(self, enemy):
+        self.enemy = enemy
+
+    def enter(self,e):
+        self.enemy.dir = 0
+
+    def exit(self,e):
+        self.enemy.dir = 0
+
+    def do(self):
+        self.enemy.frame = (self.enemy.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 5
+
+    def draw(self):
+        if self.enemy.face_dir == 1:
+            self.enemy.enmey_hit_image.clip_draw(int(self.enemy.frame) * 256, 0, 256, 145, self.enemy.x - 70, self.enemy.y - 40, 256 * 1.7, 145 * 1.7)
+        else:
+            self.enemy.enmey_hit_image.clip_composite_draw(int(self.enemy.frame) * 256, 0, 256, 145, 0, 'h',
+                self.enemy.x + 70, self.enemy.y - 40, 256 * 1.7, 145 * 1.7)
+
 class Enemy:
     def __init__(self):
         self.x, self.y = 600, 220
         self.image = load_image('enemy.png')
+        self.enmey_hit_image = load_image('enemy_hit.png')
         self.enemy_hp_image = load_image('hp_sprite.png')
         self.frame = 0
         self.dir = 0
         self.face_dir = -1
 
         self.IDLE = Idle(self)
+        self.HIT = Hit(self)
         self.state_machine = StateMachine(
-            self.IDLE, self.IDLE
+            self.IDLE, self.HIT
         )
     def update(self):
         self.state_machine.update()
