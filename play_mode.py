@@ -60,6 +60,9 @@ def init():
     boy = Boy()
     # game_world.add_object(boy, 1)
 
+    game_world.add_collision_pair('girl:enemy', girl, enemy)
+    game_world.add_collision_pair('boy:enemy', boy, enemy)
+
 def update():
     game_world.update()
     game_world.handle_collisions()
