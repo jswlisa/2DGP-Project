@@ -289,4 +289,5 @@ class Girl:
 
     def handle_collision(self, group, other):
         if group == 'girl:enemy':
-            game_world.remove_object(other)
+            if self.state_machine.cur_state == self.ATTACK or self.state_machine.cur_state == self.SKILL:
+                game_world.remove_object(other)
