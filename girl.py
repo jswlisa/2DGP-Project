@@ -294,6 +294,7 @@ class Girl:
             if self.state_machine.cur_state == self.ATTACK or self.state_machine.cur_state == self.SKILL:
                 other.state_machine = StateMachine(
                     other.HIT, {
+                        other.IDLE: {},
                         other.HIT: {timeout: other.IDLE}
                     }
                 )
