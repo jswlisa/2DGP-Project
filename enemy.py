@@ -15,6 +15,9 @@ TIME_PER_ACTION = 1.3
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAMES_PER_ACTION = 10.0
 
+def timeout(e):
+    return e[0] == 'TIMEOUT'
+
 class Idle:
     def __init__(self, enemy):
         self.enemy = enemy
@@ -46,7 +49,13 @@ class Hit:
         self.enemy.dir = 0
 
     def do(self):
-        self.enemy.frame = (self.enemy.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 5
+        self.enemy.frame += FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time
+
+        if self.enemy.frame >= 5:
+            self.enemy.frame = 0
+            # Skill이 끝나면 Idle로 자동 전환
+            self.enemy.state_machine.handle_state_event(('TIMEOUT', 0))  # TIMEOUT 이벤트를 발생시켜 상태 전환
+            return
 
     def draw(self):
         if self.enemy.face_dir == 1:
@@ -68,7 +77,9 @@ class Enemy:
         self.IDLE = Idle(self)
         self.HIT = Hit(self)
         self.state_machine = StateMachine(
-            self.IDLE, self.HIT
+            self.IDLE, {
+            self.HIT : {timeout: self.IDLE}
+            }
         )
     def update(self):
         self.state_machine.update()

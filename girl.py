@@ -292,4 +292,8 @@ class Girl:
     def handle_collision(self, group, other):
         if group == 'girl:enemy':
             if self.state_machine.cur_state == self.ATTACK or self.state_machine.cur_state == self.SKILL:
-                other.state_machine = StateMachine(other.HIT, other.HIT)
+                other.state_machine = StateMachine(
+                    other.HIT, {
+                        other.HIT: {timeout: other.IDLE}
+                    }
+                )
