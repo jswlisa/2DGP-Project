@@ -44,6 +44,9 @@ class Hit:
 
     def enter(self,e):
         self.enemy.dir = 0
+        self.enemy.hp -= 76
+        if self.enemy.hp < 0:
+            self.enemy.hp = 0
 
     def exit(self,e):
         self.enemy.dir = 0
@@ -51,9 +54,8 @@ class Hit:
     def do(self):
         self.enemy.frame += FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time
 
-        if self.enemy.frame >= 5:
+        if self.enemy.frame >= 10:
             self.enemy.frame = 0
-            # Skill이 끝나면 Idle로 자동 전환
             self.enemy.state_machine.handle_state_event(('TIMEOUT', 0))  # TIMEOUT 이벤트를 발생시켜 상태 전환
             return
 
@@ -73,6 +75,7 @@ class Enemy:
         self.frame = 0
         self.dir = 0
         self.face_dir = -1
+        self.hp = 456
 
         self.IDLE = Idle(self)
         self.HIT = Hit(self)
@@ -91,7 +94,21 @@ class Enemy:
     def draw(self):
         self.state_machine.draw()
         draw_rectangle(*self.get_bb())
-        self.enemy_hp_image.clip_draw(0, 458, 426, 76, 1000, 550, 426 // 2, 76 // 2)
+
+        max_sprite_y = 456
+        frame_height = 76
+
+        delta = max_sprite_y - self.hp
+        if delta <= 0:
+            frame_index = 0
+        else:
+            frame_index = math.ceil(delta / frame_height)
+
+        y = max_sprite_y - frame_index * frame_height
+        if y < 0:
+            y = 0
+
+        self.enemy_hp_image.clip_draw(0, y, 426, 76, 1000, 550, 426 // 2, 76 // 2)
 
     def get_bb(self):
         return self.x + 20, self.y - 110, self.x + 130, self.y + 50
