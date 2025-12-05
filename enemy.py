@@ -41,13 +41,10 @@ class Idle:
 
     def do(self):
         self.enemy.frame = (self.enemy.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 5
-
         self.enemy.is_walking = False
-
         self.enemy.bt.run()
 
     def draw(self):
-
         if self.enemy.is_walking:
             if self.enemy.face_dir == 1:
                 self.enemy.walk_image.clip_draw(int(self.enemy.frame) * 256, 0, 256, 145,
@@ -115,8 +112,7 @@ class Die:
     def draw(self):
         if self.enemy.face_dir == 1:
             self.enemy.enemy_die_image.clip_draw(int(self.enemy.frame) * 256, 0, 256, 144, self.enemy.x + 30,
-                                                 self.enemy.y - 20,
-                                                 256 * 1.4, 144 * 1.4)
+                                                 self.enemy.y - 20, 256 * 1.4, 144 * 1.4)
         else:
             self.enemy.enemy_die_image.clip_composite_draw(int(self.enemy.frame) * 256, 0, 256, 144, 0, 'h',
                                                            self.enemy.x + 30, self.enemy.y - 20, 256 * 1.4, 144 * 1.4)
@@ -138,6 +134,7 @@ class Enemy:
 
         self.speed = RUN_SPEED_PPS
         self.tx, self.ty = 1000, 1000
+
         self.build_behavior_tree()
         self.is_walking = False
 
@@ -184,62 +181,66 @@ class Enemy:
     def handle_collision(self, group, other):
         pass
 
-    # Behavior Tree
-    def get_girl(self):
+
+    def get_nearest_player(self):
+        candidates = []
         for layer in game_world.world:
             for obj in layer:
-                if type(obj).__name__ == 'Girl':
-                    return obj
-        return None
+                if type(obj).__name__ in ['Girl', 'Boy']:
+                    candidates.append(obj)
 
-    def is_girl_nearby(self, r):
-        girl = self.get_girl()
-        if girl is None:
+        if not candidates:
+            return None
+
+        closest_player = min(candidates, key=lambda p: (p.x - self.x) ** 2 + (p.y - self.y) ** 2)
+
+        return closest_player
+
+    def is_player_nearby(self, r):
+        player = self.get_nearest_player()
+
+        if player is None:
             return BehaviorTree.FAIL
 
-        distance_sq = (girl.x - self.x) ** 2 + (girl.y - self.y) ** 2
+        distance_sq = (player.x - self.x) ** 2 + (player.y - self.y) ** 2
+
         if distance_sq < r ** 2:
-            self.target_girl = girl
+            self.target_player = player
             return BehaviorTree.SUCCESS
         else:
             return BehaviorTree.FAIL
 
-    def move_to_girl(self):
-        if not hasattr(self, 'target_girl') or self.target_girl is None:
+    def move_to_player(self):
+        if not hasattr(self, 'target_player') or self.target_player is None:
             return BehaviorTree.FAIL
 
-        girl = self.target_girl
+        target_exists = False
+        for layer in game_world.world:
+            if self.target_player in layer:
+                target_exists = True
+                break
 
-        self.dir = math.atan2(girl.y - self.y, girl.x - self.x)
+        if not target_exists:
+            self.target_player = None
+            return BehaviorTree.FAIL
+
+        player = self.target_player
+
+        self.dir = math.atan2(player.y - self.y, player.x - self.x)
         self.x += self.speed * math.cos(self.dir) * game_framework.frame_time
         self.y += self.speed * math.sin(self.dir) * game_framework.frame_time
-        self.face_dir = 1 if girl.x > self.x else -1
+        self.face_dir = 1 if player.x > self.x else -1
 
         self.is_walking = True
 
         return BehaviorTree.RUNNING
 
-    def wander(self):
-        angle = math.atan2(self.ty - self.y, self.tx - self.x)
-        self.x += self.speed * math.cos(angle) * game_framework.frame_time
-        self.y += self.speed * math.sin(angle) * game_framework.frame_time
-        self.face_dir = 1 if self.tx > self.x else -1
-
-        self.is_walking = True
-
-        dist_sq = (self.tx - self.x) ** 2 + (self.ty - self.y) ** 2
-        if dist_sq < 50 ** 2:
-            self.tx = random.randint(100, 1100)
-            self.ty = random.randint(100, 600)
-            return BehaviorTree.SUCCESS
-
-        return BehaviorTree.RUNNING
 
     def build_behavior_tree(self):
-        find_girl = Condition("Girl 발견?", self.is_girl_nearby, 500)
-        chase_girl = Action("Girl 추적", self.move_to_girl)
-        chase_sequence = Sequence("추적", find_girl, chase_girl)
+        find_player = Condition("플레이어 발견?", self.is_player_nearby, 500)
 
-        wander_action = Action("배회", self.wander)
+        chase_player = Action("플레이어 추적", self.move_to_player)
 
-        self.bt = Selector("행동 선택", chase_sequence, wander_action)
+        chase_sequence = Sequence("추적", find_player, chase_player)
+
+        self.bt = Selector("행동 선택", chase_sequence)
