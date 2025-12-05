@@ -44,7 +44,7 @@ class Hit:
 
     def enter(self,e):
         self.enemy.dir = 0
-        self.enemy.hp -= 76
+        self.enemy.hp -= 76/2
         if self.enemy.hp < 0:
             self.enemy.hp = 0
 
@@ -54,7 +54,7 @@ class Hit:
     def do(self):
         self.enemy.frame += FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time
 
-        if self.enemy.frame >= 10:
+        if self.enemy.frame >= 5:
             self.enemy.frame = 0
             self.enemy.state_machine.handle_state_event(('TIMEOUT', 0))  # TIMEOUT 이벤트를 발생시켜 상태 전환
             return
