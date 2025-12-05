@@ -18,12 +18,16 @@ FRAMES_PER_ACTION = 10.0
 def timeout(e):
     return e[0] == 'TIMEOUT'
 
+def die(e):
+    return e[0] == 'DIE'
+
 class Idle:
     def __init__(self, enemy):
         self.enemy = enemy
 
-    def enter(self,e):
+    def enter(self, e):
         self.enemy.dir = 0
+        self.enemy.frame = 0
 
     def exit(self,e):
         self.enemy.dir = 0
@@ -53,18 +57,47 @@ class Hit:
 
     def do(self):
         self.enemy.frame += FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time
-
+        if self.enemy.hp <= 0:
+            self.enemy.state_machine.handle_state_event(('DIE', 0))
+            return
         if self.enemy.frame >= 5:
             self.enemy.frame = 0
-            self.enemy.state_machine.handle_state_event(('TIMEOUT', 0))  # TIMEOUT 이벤트를 발생시켜 상태 전환
+            self.enemy.state_machine.handle_state_event(('TIMEOUT', 0))
             return
 
     def draw(self):
         if self.enemy.face_dir == 1:
-            self.enemy.enmey_hit_image.clip_draw(int(self.enemy.frame) * 256, 0, 256, 145, self.enemy.x - 70, self.enemy.y - 40, 256 * 1.7, 145 * 1.7)
+            self.enemy.enmey_hit_image.clip_draw(int(self.enemy.frame) * 256, 0, 256, 145, self.enemy.x - 70,
+                                                 self.enemy.y - 40, 256 * 1.7, 145 * 1.7)
         else:
             self.enemy.enmey_hit_image.clip_composite_draw(int(self.enemy.frame) * 256, 0, 256, 145, 0, 'h',
-                self.enemy.x + 70, self.enemy.y - 40, 256 * 1.7, 145 * 1.7)
+                                                           self.enemy.x + 70, self.enemy.y - 40, 256 * 1.7, 145 * 1.7)
+
+
+class Die:
+    def __init__(self, enemy):
+        self.enemy = enemy
+
+    def enter(self, e):
+        self.enemy.dir = 0
+        self.enemy.frame = 0
+
+    def exit(self, e):
+        self.enemy.dir = 0
+
+    def do(self):
+        self.enemy.frame += FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time
+        if self.enemy.frame >= 4:
+            self.enemy.frame = 4
+
+    def draw(self):
+        if self.enemy.face_dir == 1:
+            self.enemy.enemy_die_image.clip_draw(int(self.enemy.frame) * 256, 0, 256, 144, self.enemy.x - 30, self.enemy.y - 20,
+                                                 256 * 1.4, 144 * 1.4)
+        else:
+            self.enemy.enemy_die_image.clip_composite_draw(int(self.enemy.frame) * 256, 0, 256, 144, 0, 'h',
+                                                           self.enemy.x + 30, self.enemy.y - 20, 256 * 1.4, 144 * 1.4)
+
 
 class Enemy:
     def __init__(self):
@@ -72,6 +105,8 @@ class Enemy:
         self.image = load_image('enemy.png')
         self.enmey_hit_image = load_image('enemy_hit.png')
         self.enemy_hp_image = load_image('hp_sprite.png')
+        self.enemy_die_image = load_image('enemy_die.png')
+
         self.frame = 0
         self.dir = 0
         self.face_dir = -1
@@ -79,9 +114,13 @@ class Enemy:
 
         self.IDLE = Idle(self)
         self.HIT = Hit(self)
+        self.DIE = Die(self)
+
         self.state_machine = StateMachine(
             self.IDLE, {
-            self.HIT : {timeout: self.IDLE}
+                self.IDLE: {die: self.DIE, Hit: self.HIT},
+                self.HIT: {timeout: self.IDLE, die: self.DIE},
+                self.DIE: {die: self.DIE}
             }
         )
     def update(self):
