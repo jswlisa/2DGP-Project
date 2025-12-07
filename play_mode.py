@@ -56,6 +56,14 @@ def init():
         game_over_font = None
         stage_message_font = None
 
+    try:
+        if bgm is None:
+            bgm = load_music('background_music.mp3')
+            bgm.set_volume(32)
+            bgm.repeat_play()
+    except:
+        print("background_music.mp3 파일을 찾을 수 없습니다.")
+
     is_cleared = False
     is_game_over = False
     clear_timer = 0.0
