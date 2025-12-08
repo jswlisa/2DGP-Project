@@ -1,7 +1,7 @@
-import character_choose_mode
 import game_framework
 from pico2d import *
-import play_mode
+
+import instruction_mode
 
 image = None
 
@@ -12,22 +12,22 @@ def resume():
     pass
 
 def init():
-    global image
-
+    global image, font
     image = load_image('title.png')
+    font = load_font('font.ttf', 40)
 
 def finish():
     global image
-    del image   # 메모리 소멸이라고 생각하면 됨
+    del image
     pass
 
 def update():
     pass
 
-
 def draw():
     clear_canvas()
     image.draw(600, 300)
+    font.draw(400, 100, "Press 'SPACE' to Start", (255, 100, 100))
     update_canvas()
 
 def handle_events():
@@ -38,4 +38,4 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.quit()
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_SPACE):
-            game_framework.change_mode(character_choose_mode)
+            game_framework.change_mode(instruction_mode)
